@@ -21,7 +21,7 @@ public class ChatServer {
     public ChatServer(int port, Logger logger) throws IOException {
         serverSocket = new ServerSocket(port);
         this.logger = logger;
-        connections = Collections.synchronizedList(new ArrayList<>());
+        this.connections = Collections.synchronizedList(new ArrayList<>());
         logger.info(serverSocket.getInetAddress().getHostAddress());
     }
 
@@ -39,7 +39,20 @@ public class ChatServer {
         }
     }
 
-    public List<ClientConnection> getClients(){
-        return new ArrayList<>(connections);
+    public void broadcast(String message, ClientConnection origin){
+        connections.forEach(client -> {
+            if (client == origin){
+                return;
+            }
+            client.send(message);
+        });
+    }
+
+    public void sendTo(String message, ClientConnection target){
+        target.send(message);
+    }
+
+    public void closeConnection(ClientConnection connection){
+        connections.remove(connection);
     }
 }
