@@ -26,19 +26,21 @@ public class ClientConnection implements Runnable{
         try(
             final InputStream inputStream = socket.getInputStream();
             final OutputStream outputStream = socket.getOutputStream();
+            final Scanner input = new Scanner(inputStream);
         ) {
             if (printer == null){
-                printer = new PrintWriter(outputStream);
+                printer = new PrintWriter(outputStream, true);
             }
-            Scanner input = new Scanner(inputStream);
             while (input.hasNext()) {
-                server.broadcast(read(input), this);
+                String message = read(input);
+                logger.info("client at " + socket.getInetAddress() + ":" + socket.getPort() +  " send: " + message);
+                server.broadcast( message, this);
             }
-            //client po rozłaczeniu musi usunąć swoje połączenie z serwera
+            //client po rozłączeniu musi usunąć swoje połączenie z serwera
             server.closeConnection(this);
             logger.info("Client closed connection: " + socket.getInetAddress());
         } catch (IOException e) {
-            logger.warning("Can't get connection with client!");
+            logger.warning("Can't get connection to client!");
             e.printStackTrace();
         }
     }
@@ -47,9 +49,12 @@ public class ClientConnection implements Runnable{
         if (printer == null){
             return;
         }
-        synchronized (printer){
-            printer.println(message);
-        }
+        logger.info("Server send to " + socket.getInetAddress() + ":" + socket.getPort() + " message " + message);
+        printer.println(message);
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 
     private String read(Scanner in){

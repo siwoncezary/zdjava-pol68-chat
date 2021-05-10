@@ -25,9 +25,9 @@ public class ChatServer {
         logger.info(serverSocket.getInetAddress().getHostAddress());
     }
 
-    public void start(){
-        while(true) {
-            try{
+    public void start() {
+        while (true) {
+            try {
                 final Socket socket = serverSocket.accept();
                 logger.info("Connection with client: " + socket.getInetAddress());
                 ClientConnection connection = new ClientConnection(socket, logger, this);
@@ -39,20 +39,17 @@ public class ChatServer {
         }
     }
 
-    public void broadcast(String message, ClientConnection origin){
+    public void broadcast(String message, ClientConnection origin) {
         connections.forEach(client -> {
-            if (client == origin){
+            if (client == origin) {
                 return;
             }
+
             client.send(message);
         });
     }
 
-    public void sendTo(String message, ClientConnection target){
-        target.send(message);
-    }
-
-    public void closeConnection(ClientConnection connection){
+    public void closeConnection(ClientConnection connection) {
         connections.remove(connection);
     }
 }
